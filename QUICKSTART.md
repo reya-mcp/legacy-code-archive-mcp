@@ -44,15 +44,26 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ---
 
-## 방법 2: 로컬 개발 모드
+## 방법 2: 로컬 개발 모드 (uv + taskipy)
 
-### 1. 의존성 설치
+### 1. uv 설치
 
 ```bash
-pip install -r requirements.txt
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### 2. 환경 설정
+### 2. 프로젝트 의존성 설치
+
+```bash
+# 프로젝트 루트에서 실행
+uv sync
+```
+
+### 3. 환경 설정
 
 `.env` 파일을 생성하세요:
 
@@ -61,17 +72,34 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 PROJECT_PATHS=/path/to/your/legacy/project
 ```
 
-### 3. 서버 로컬 테스트
+### 4. 개발 스크립트 실행
 
 ```bash
-# 서버 실행
-python legacy_code_archive_mcp/server.py
+# 개발 서버 실행
+uv run task dev
 
-# 다른 터미널에서 fastmcp CLI로 테스트
-fastmcp dev legacy_code_archive_mcp/server.py
+# 테스트 실행
+uv run task test
+
+# 코드 포맷팅
+uv run task format
+
+# 전체 검사 (lint + type-check + test)
+uv run task check
 ```
 
-### 4. Claude Desktop 통합
+**사용 가능한 모든 스크립트:**
+- `dev` / `d` - 개발 서버 실행
+- `test` / `t` - 테스트 실행
+- `test-cov` - 커버리지 포함 테스트
+- `lint` / `l` - 코드 품질 검사
+- `format` / `f` - 자동 포맷팅
+- `type-check` - 타입 체크
+- `build` - 패키지 빌드
+- `clean` - 빌드 파일 정리
+- `check` - 전체 검사 (CI용)
+
+### 5. Claude Desktop 통합
 
 ```json
 {

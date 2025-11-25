@@ -5,6 +5,8 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.13+-green.svg)](https://github.com/jlowin/fastmcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/yourusername/legacy-code-archive-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/legacy-code-archive-mcp/actions/workflows/test.yml)
+[![Publish](https://github.com/yourusername/legacy-code-archive-mcp/actions/workflows/publish.yml/badge.svg)](https://github.com/yourusername/legacy-code-archive-mcp/actions/workflows/publish.yml)
 
 ## 🚀 빠른 시작
 
@@ -33,6 +35,35 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
 ```
 
 더 자세한 설치 방법은 [QUICKSTART.md](QUICKSTART.md) 및 [DEPLOY.md](DEPLOY.md)를 참고하세요.
+
+---
+
+## 📦 개발 스크립트
+
+이 프로젝트는 `uv` + `taskipy`를 사용합니다.
+
+```bash
+# 개발 서버
+uv run task dev        # 또는 uv run task d
+
+# 테스트
+uv run task test       # 또는 uv run task t
+uv run task test-cov   # 커버리지 포함
+
+# 코드 품질
+uv run task lint       # 또는 uv run task l
+uv run task format     # 또는 uv run task f
+uv run task type-check # 타입 체크
+
+# 빌드 & 정리
+uv run task build      # 패키지 빌드
+uv run task clean      # 빌드 파일 정리
+
+# 전체 검사 (CI용)
+uv run task check      # lint + type-check + test
+```
+
+자세한 개발 워크플로우는 [DEPLOY.md](DEPLOY.md)를 참고하세요.
 
 ---
 

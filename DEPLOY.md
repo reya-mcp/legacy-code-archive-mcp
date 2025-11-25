@@ -61,6 +61,55 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 설정을 저장하고 Claude Desktop을 재시작하면 자동으로 서버가 로드됩니다!
 
+---
+
+## 개발 워크플로우 (uv + taskipy)
+
+이 프로젝트는 `uv` 패키지 관리자와 `taskipy` 작업 러너를 사용합니다.
+
+### 1. 개발 환경 설정
+
+먼저 uv를 설치하세요 (위의 "uv 설치" 섹션 참고)
+
+### 2. 프로젝트 의존성 설치
+
+```bash
+# 프로젝트 루트에서 실행
+uv sync
+```
+
+### 3. 사용 가능한 스크립트
+
+```bash
+# 개발 서버 실행
+uv run task dev     # 또는 uv run task d
+
+# 테스트 실행
+uv run task test    # 또는 uv run task t
+uv run task test-cov  # 커버리지 포함
+
+# 코드 품질 검사
+uv run task lint    # 또는 uv run task l
+uv run task format  # 또는 uv run task f
+uv run task type-check
+
+# 빌드 & 정리
+uv run task build
+uv run task clean
+
+# 전체 검사 (CI용)
+uv run task check   # lint + type-check + test
+```
+
+### 4. 로컬 개발 모드로 설치
+
+```bash
+# 편집 가능 모드로 설치
+uv pip install -e .
+```
+
+---
+
 ## PyPI 배포 (패키지 게시)
 
 ### 1. 빌드 도구 설치
@@ -104,47 +153,81 @@ pip install legacy-code-archive-mcp
 uvx legacy-code-archive-mcp
 ```
 
-## GitHub Actions 자동 배포 (선택)
+## GitHub Actions 자동 배포 (권장)
 
-`.github/workflows/publish.yml` 파일 생성:
+이 프로젝트는 GitHub Actions를 통한 자동 배포를 지원합니다.
 
-```yaml
-name: Publish to PyPI
+### 설정된 워크플로우
 
-on:
-  release:
-    types: [published]
+#### 1. 자동 테스트 (`.github/workflows/test.yml`)
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+PR 및 main 브랜치 push 시 자동 실행:
+- Python 3.11, 3.12 매트릭스 테스트
+- 린트, 타입 체크, 테스트 실행
+- 코드 품질 자동 검증
 
-    steps:
-    - uses: actions/checkout@v3
+#### 2. 자동 PyPI 배포 (`.github/workflows/publish.yml`)
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+GitHub Release 생성 시 자동으로 PyPI에 배포:
+- 전체 검사 실행 (lint + type-check + test)
+- 패키지 빌드
+- PyPI 자동 업로드
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
+### GitHub Secrets 설정
 
-    - name: Build package
-      run: python -m build
+배포를 위해 다음 Secret을 설정해야 합니다:
 
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: twine upload dist/*
+1. **PyPI API 토큰 발급**
+   - https://pypi.org/manage/account/token/ 접속
+   - "Add API token" 클릭
+   - Token name: `legacy-code-archive-mcp`
+   - Scope: "Entire account" (첫 배포) 또는 프로젝트 선택
+   - 생성된 토큰 복사 (⚠️ 한 번만 표시됨!)
+
+2. **GitHub Secret 추가**
+   - GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions**
+   - **New repository secret** 클릭
+   - Name: `PYPI_API_TOKEN`
+   - Secret: 위에서 복사한 PyPI API 토큰 붙여넣기
+   - **Add secret** 클릭
+
+### 릴리스 생성 및 자동 배포
+
+#### 방법 1: GitHub UI 사용
+
+1. GitHub 저장소 → **Releases** → **Create a new release**
+2. **Choose a tag** → 새 태그 생성 (예: `v1.0.0`)
+3. Release title: `v1.0.0 - Initial Release`
+4. 릴리스 노트 작성
+5. **Publish release** 클릭
+6. GitHub Actions가 자동으로 PyPI에 배포 🚀
+
+#### 방법 2: Git 명령어 사용
+
+```bash
+# 1. 버전 번호 업데이트
+# pyproject.toml의 version을 수정
+
+# 2. 변경사항 커밋
+git add pyproject.toml
+git commit -m "Bump version to 1.0.1"
+
+# 3. 태그 생성
+git tag v1.0.1
+
+# 4. 푸시
+git push origin main --tags
+
+# 5. GitHub에서 Release 생성
+# 또는 gh CLI 사용:
+gh release create v1.0.1 --title "v1.0.1 - Bug fixes" --notes "버그 수정 및 성능 개선"
 ```
 
-### GitHub Secrets 설정:
-1. GitHub 저장소 → Settings → Secrets and variables → Actions
-2. `PYPI_API_TOKEN` 추가 (PyPI에서 발급받은 API 토큰)
+### 배포 상태 확인
+
+- **Actions 탭**: 워크플로우 실행 상태 확인
+- **PyPI**: https://pypi.org/project/legacy-code-archive-mcp/
+- **배지**: README.md에서 배포 상태 확인
 
 ## 전통적인 방법 (pip install)
 

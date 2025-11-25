@@ -29,15 +29,6 @@ dependencies = [
 [project.scripts]
 legacy-code-archive-mcp = "legacy_code_archive_mcp.server:main"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-]
-
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -59,3 +50,37 @@ python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[tool.uv]
+dev-dependencies = [
+    "taskipy>=1.13.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[tool.taskipy.tasks]
+# 개발 서버
+dev = "python -m legacy_code_archive_mcp.server"
+d = "task dev"
+
+# 테스트
+test = "pytest tests/ -v"
+t = "task test"
+test-cov = "pytest tests/ --cov=legacy_code_archive_mcp --cov-report=html"
+
+# 코드 품질
+lint = "ruff check . && black --check ."
+l = "task lint"
+format = "black . && ruff check --fix ."
+f = "task format"
+type-check = "mypy legacy_code_archive_mcp/"
+
+# 빌드
+build = "python -m build"
+clean = "rm -rf dist/ build/ *.egg-info/ **/__pycache__ .pytest_cache/ .coverage htmlcov/"
+
+# 전체 체크 (CI용)
+check = "task lint && task type-check && task test"
